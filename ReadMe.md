@@ -7,9 +7,12 @@ Semenova, Vira "Debiased Machine Learning of Set-Identified Linear Models", arXi
 The replicator should expect the code to run for each table around 10 mins.
 
 The following packages must be installed:
+
     R 3.6.1 (code was last run with version 3.6.1)
-    – ```hdm''' (as of 2021-02-16)
-    – ```xtable''' (as of 2021-02-16)
+    
+    – ```hdm``` (as of 2021-02-16)
+    
+    – ```xtable``` (as of 2021-02-16)
  
 ### Replicate code
 
