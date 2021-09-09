@@ -10,10 +10,10 @@ The following packages must be installed:
     – hdm (as of 2021-02-16)
     – xtable (as of 2021-02-16)
 
-Tables from Main Text and Appendix are referred to as MainTables. The intermediate tables are saved as Tablek.csv, for k in {1,2,3,4}.
+Tables from Main Text and Appendix are referred to as MainTables. The intermediate tables are saved as Tablek.csv, for  k in {oracle_std, oracle_prop, lasso, series}.  
 
 
-1. Open  Runk.R, where k in {oracle_std, oracle_prop, lasso, series}.  
+1. Open  Runk.R, where  k in {oracle_std, oracle_prop, lasso, series}.  
 
 2. Adjust the foldername in line 6
 
