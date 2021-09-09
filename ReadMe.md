@@ -1,5 +1,5 @@
 # doubleml4bounds
-This R package implements sharp bounds on treatments effects in the presence of selection/nonresponse bias in randomized control trials. It includes basic Lee bounds  [Semenova (2017)](https://arxiv.org/abs/1712.10024). It compares two methods:
+This is replication code for  [Semenova (2017)](https://arxiv.org/abs/1712.10024). It estimates the upper bound on a treatment effect parameter when the outcome variable is recorded in brackets. The code compares two methods:
 
 -- series-based support function estimator of [Chandrasekhar et al (2012)](https://arxiv.org/abs/1212.5627)
 
