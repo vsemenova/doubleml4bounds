@@ -14,8 +14,13 @@ The following packages must be installed:
 ### Replicate code
 
 module load R
+
+
 Rscript  Run_oracle_std.R Run_oracle_prop.R Run_lasso.R Run_series.R
+
+
 Rscript print_main_table.R
 
 ### Contact
+
 Vira Semenova, semenovavira@gmail.com
