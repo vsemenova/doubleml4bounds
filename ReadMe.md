@@ -10,19 +10,19 @@ The following packages must be installed:
 
     R 3.6.1 (code was last run with version 3.6.1)
     
-    – ```hdm``` (as of 2021-02-16)
+    – ```hdm''' (as of 2021-02-16)
     
-    – ```xtable``` (as of 2021-02-16)
+    – ```xtable''' (as of 2021-02-16)
  
 ### Replicate code
 
-module load R
+```module load R
 
 
 Rscript  Run_oracle_std.R Run_oracle_prop.R Run_lasso.R Run_series.R
 
 
-Rscript print_main_table.R
+Rscript print_main_table.R'''
 
 ### Contact
 
