@@ -1,8 +1,7 @@
 
 ## adjust your directoryname here
-directoryname<-"/n/tata"
+directoryname<-"/n/tata/doubleml4bounds/"
 setwd(directoryname)
-setwd("sims_pi")
 source("Functions.R")
 source("FirstStage.R")
 source("RemoveControls.R")
@@ -106,5 +105,5 @@ for (j in 1:length(Deltas)) {
 }
 
 finaltable<-apply(finaltable,2,round,2)
-write.csv(finaltable,paste0(directoryname,"/sims_pi/Tables/Table_oracle_std.csv"))
+write.csv(finaltable,paste0(directoryname,"/Tables/Table_oracle_std.csv"))
 

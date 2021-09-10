@@ -23,13 +23,15 @@ vabs<-function(x){
 
 ## OLS
 
-OLS<-function(covariate,outcome) {
+OLS<-function(covariate,outcome,weights=NULL) {
   outcome<-as.matrix(outcome)
   b.hat<-matrix(0,dim(covariate)[2],dim(outcome)[2])
-  
+  if (is.null(weights)) {
+    weights<-rep(1,dim(covariate)[1])
+  }
  
   for (j in 1:dim(outcome)[2]) {
-    b.hat[,j]<-solve(cov(covariate))%*%apply(covariate*matrix(rep(outcome[,j],dim(covariate)[2]),ncol=dim(covariate)[2]),2,mean)
+    b.hat[,j]<-solve(cov.wt(covariate,wt=weights)$cov)%*%apply(covariate*matrix(rep(outcome[,j],dim(covariate)[2]),ncol=dim(covariate)[2]),2,weighted.mean,weights)
   }
   return(b.hat)
 }
@@ -73,17 +75,26 @@ simulate_data_2d<-function(seed,decay,sample_size,p,beta,cons.x,cons.eta,Sigma,D
 
 
 
-estimate_sigma<-function(data,num_circle,sample_size,Delta,treat.name,outcome.name,seed=NULL,fitted_outcome_name=NULL,partial_out=FALSE, ...) {
+estimate_sigma<-function(data,num_circle,sample_size,Delta,treat.name,outcome.name,seed=NULL,fitted_outcome_name=NULL,partial_out=FALSE,weighted=FALSE, ...) {
   
   
   
   
   if (is.null(seed)) {
     inds<-1:sample_size
+    weights<-rep(1,sample_size)
    
   } else {
     set.seed(seed)
-    inds<-sample(1:sample_size,sample_size,replace=TRUE)
+    if (weighted==FALSE) {
+      inds<-sample(1:sample_size,sample_size,replace=TRUE)
+      weights<-rep(1,sample_size)
+    } else {
+      inds<-1:sample_size
+      weights<-rexp(sample_size)
+      weights<-weights/mean(weights)
+    }
+    
   }
   
   
@@ -95,7 +106,7 @@ estimate_sigma<-function(data,num_circle,sample_size,Delta,treat.name,outcome.na
   sigma.hat<-matrix(0,num_circle,dim(outcomeL)[2])
   
   ### covariance matrix
-  Sigma.hat<-cov(covariate)
+  Sigma.hat<-cov.wt(covariate,wt=weights)$cov
   for (k in 1:num_circle) {
     #print(k)
     alpha = 2*pi/num_circle*k
@@ -115,7 +126,81 @@ estimate_sigma<-function(data,num_circle,sample_size,Delta,treat.name,outcome.na
     } else {
       outcome = yubg
     }
-    b.hat=OLS(covariate,outcome) 
+    if (weighted==TRUE) {
+      b.hat=OLS(covariate,outcome,weights=weights) 
+    } else {
+      b.hat=OLS(covariate,outcome)
+    }
+    
+    
+    sigma.hat[k,] = t(q)%*% b.hat
+  }
+  return(sigma.hat)
+}
+
+
+
+#### Chandrasekhar, Chernozhukov, Molinari, Schrimpf (2012) et al only
+
+first_stage_ols<-function(covariate, outcome,weights) {
+  b.hat=OLS(covariate=as.matrix(covariate),outcome=as.matrix(outcome),weights=weights)
+  fitted_value = as.matrix(covariate)%*%b.hat
+  residual = outcome-fitted_value
+  return(residual)
+}
+
+estimate_sigma_series<-function(data,num_circle,sample_size,Delta,treat.name,outcome.name,control.name,seed=NULL,fitted_outcome_name=NULL,partial_out=FALSE,weighted=FALSE, ...) {
+  
+  
+  
+  
+  if (is.null(seed)) {
+    inds<-1:sample_size
+    weights<-rep(1,sample_size)
+  } else {
+    set.seed(seed)
+    
+    if (weighted == TRUE) {
+      inds<-1:sample_size
+      weights<-rexp(sample_size)
+    } else {
+      inds<-sample(1:sample_size,sample_size,replace=TRUE)
+      weights<-rep(1,sample_size)
+    }
+  }
+  
+  
+  covariate<-data[inds,treat.name]
+  outcomeL<-as.matrix(data[inds,outcome.name])
+  outcomeU<-outcomeL+Delta
+  
+  fitted_residuals<-first_stage_ols(data[inds,control.name],data[inds,treat.name],weights=weights)
+  
+  ## support function estimate
+  sigma.hat<-matrix(0,num_circle,dim(outcomeL)[2])
+  
+  ### covariance matrix
+  Sigma.hat<-cov.wt(covariate,wt=weights)$cov
+  for (k in 1:num_circle) {
+    #print(k)
+    alpha = 2*pi/num_circle*k
+    q = c(cos(alpha),sin(alpha))
+    
+    #print(Sigma.hat)
+    
+    direction = t(q)%*%solve(Sigma.hat)%*%t(fitted_residuals)
+    ### discrete version
+    yubg = outcomeL
+    yubg[direction>0,] =  outcomeU[direction>0,]
+    
+    if (partial_out==TRUE) {
+      ## partial out the controls (see Remark 4.2)
+      gammaL.X<-as.matrix(data[inds,fitted_outcome_name])
+      outcome = yubg-gammaL.X-Delta/2 
+    } else {
+      outcome = yubg
+    }
+    b.hat=OLS(fitted_residuals,outcome,weights=weights) 
     sigma.hat[k,] = t(q)%*% b.hat
   }
   return(sigma.hat)

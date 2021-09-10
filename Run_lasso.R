@@ -1,9 +1,9 @@
 library(hdm)
 library(xtable)
 
-directoryname<-"/n/tata"
-setwd("/n/tata/")
-setwd("sims_pi")
+directoryname<-"/n/tata/doubleml4bounds/"
+setwd(directoryname)
+
 source("Functions.R")
 source("FirstStage.R")
 source("RemoveControls.R")
@@ -26,7 +26,7 @@ p=50
 num_circle=50
 N_reps=500
 num_splits<-2
-B=200
+B=500
 control.name = paste0("Z.",as.character(1:p))
 ### confidence level
 ci_alpha=0.05
@@ -65,9 +65,9 @@ for (j in 1:length(Deltas)) {
     
     
     sample_size=sample_sizes[i]
-    set.seed(888)
-    indices<-sample(1:sample_size,size=sample_size,replace=FALSE)
-    INDS<-lapply(1:num_splits, function (i) indices[(ceiling(sample_size/num_splits)*(i-1) + 1): min((ceiling(sample_size/num_splits)*(i)),sample_size)])
+    #set.seed(888)
+  #  indices<-sample(1:sample_size,size=sample_size,replace=FALSE)
+    #INDS<-lapply(1:num_splits, function (i) indices[(ceiling(sample_size/num_splits)*(i-1) + 1): min((ceiling(sample_size/num_splits)*(i)),sample_size)])
     
     
     simulated_data<-lapply(1:N_reps,simulate_data_2d, decay=decay,
@@ -79,18 +79,18 @@ for (j in 1:length(Deltas)) {
                              method.outcome = method.outcome,
                              treat.name = c("X1","X2"),
                              outcome.name = c("yL"),
-                             control.name = control.name,INDS = INDS,num_splits=num_splits)
+                             control.name = control.name,num_splits=1)
     
     
     
     
     estimated_support_function<-lapply(fitted_residuals,estimate_sigma,sample_size=sample_sizes[i],num_circle=num_circle,
                                        Delta=Deltas[j],treat.name=c("treat.X1","treat.X2"),outcome.name=c("true_outcome"),fitted_outcome_name="fitted_outcome",
-                                       partial_out=TRUE)
+                                       partial_out=TRUE,weighted=FALSE)
     
     bootstrap_support_function<-lapply(1:B,estimate_sigma,estimate_sigma, sample_size=sample_sizes[i],num_circle=num_circle,
                                        Delta=Deltas[j],treat.name=c("treat.X1","treat.X2"),outcome.name=c("true_outcome"),fitted_outcome_name="fitted_outcome",
-                                       partial_out=TRUE,data=fitted_residuals[[1]])
+                                       partial_out=TRUE,data=fitted_residuals[[1]],weighted=FALSE)
     
     diff<-array(0,c(num_circle,2,N_reps))
     for (k in 1:N_reps) {
@@ -127,4 +127,4 @@ for (j in 1:length(Deltas)) {
 }
 
 finaltable<-apply(finaltable,2,round,2)
-write.csv(finaltable,paste0(directoryname,"/sims_pi/Tables/Table_lasso.csv"))
+write.csv(finaltable,paste0(directoryname,"/Tables/Table_lasso1.csv"))

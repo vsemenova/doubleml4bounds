@@ -2,9 +2,8 @@ install.packages("hdm")
 library(hdm)
 library(xtable)
 
-directoryname<-"/n/tata"
-setwd("/n/tata/")
-setwd("sims_pi")
+directoryname<-"/n/tata/doubleml4bounds/"
+setwd(directoryname)
 source("Functions.R")
 source("FirstStage.R")
 source("RemoveControls.R")
@@ -129,5 +128,5 @@ for (j in 1:length(Deltas)) {
 }
 
 finaltable<-apply(finaltable,2,round,2)
-write.csv(finaltable,paste0(directoryname,"/sims_pi/Tables/Table_oracle_prop.csv"))
+write.csv(finaltable,paste0(directoryname,"/Tables/Table_oracle_prop.csv"))
 

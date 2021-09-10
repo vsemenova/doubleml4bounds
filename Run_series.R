@@ -1,7 +1,6 @@
 ## adjust your directoryname here
-directoryname<-"/n/tata"
+directoryname<-"/n/tata/doubleml4bounds/"
 setwd(directoryname)
-setwd("sims_pi")
 source("Functions.R")
 source("FirstStage.R")
 source("RemoveControls.R")
@@ -25,7 +24,7 @@ p=50
 num_circle=50
 N_reps=500
 num_splits<-2
-B=200
+B=700
 control.name = paste0("Z.",as.character(1:p))
 ### confidence level
 ci_alpha=0.05
@@ -43,11 +42,7 @@ rej.freq<-array(0,c(2,length(sample_sizes),length(Deltas)))
 ### save results here
 finaltable<-matrix(0,nrow=length(sample_sizes),ncol=length(Deltas)*4)
 
-first_stage_ols<-function(data,control.name,outcome.name) {
-    b.hat=OLS(covariate=as.matrix(data[,control.name]),outcome=as.matrix(data[,outcome.name]))
-    fitted_value = as.matrix(data[,control.name])%*%b.hat
-    return(cbind(fitted_value,yL=data$yL))
-}
+
 
 
 ### critical value based on bootstrap
@@ -76,18 +71,15 @@ for (j in 1:length(Deltas)) {
                            Sigma=Sigma,Delta=Deltas[j],rho=rho,control.name=control.name)
     
     
-    fitted_residuals<-lapply(simulated_data, first_stage_ols,control.name=control.name,outcome.name=c("X1","X2"))
-      
-      
-
     
     
-    estimated_support_function<-lapply(fitted_residuals,estimate_sigma,sample_size=sample_sizes[i],num_circle=num_circle,
-                                       Delta=Deltas[j],treat.name=c(1:2),outcome.name=c("yL"),partial_out=FALSE)
     
-    bootstrap_support_function<-lapply(1:B,estimate_sigma,num_circle=num_circle,Delta=Deltas[j],treat.name=c(1:2),
-                                       outcome.name=c("yL"),data=fitted_residuals[[1]],sample_size=sample_sizes[i],
-                                       partial_out=FALSE)
+    estimated_support_function<-lapply(simulated_data,estimate_sigma_series,sample_size=sample_sizes[i],num_circle=num_circle,
+                                       Delta=Deltas[j],treat.name=c(1:2),outcome.name=c("yL"),partial_out=FALSE,control.name=control.name,weighted=FALSE)
+    
+    bootstrap_support_function<-lapply(1:B,estimate_sigma_series,num_circle=num_circle,Delta=Deltas[j],treat.name=c(1:2),
+                                       outcome.name=c("yL"),data=simulated_data[[1]],sample_size=sample_sizes[i],
+                                       partial_out=FALSE,control.name=control.name,weighted=TRUE)
     
     diff<-array(0,c(num_circle,2,N_reps))
     for (k in 1:N_reps) {
@@ -124,4 +116,4 @@ for (j in 1:length(Deltas)) {
 }
 
 finaltable<-apply(finaltable,2,round,2)
-write.csv(finaltable,paste0(directoryname,"/sims_pi/Tables/Table_series.csv"))
+write.csv(finaltable,paste0(directoryname,"/Tables/Table_series.csv"))

@@ -2,7 +2,7 @@
 
 rm(list=ls())
 library(xtable)
-my_path<-"/net/holyparkesec/data/tata/sims_pi/"
+my_path<-"/net/holyparkesec/data/tata/doubleml4bounds/"
 
 ### print main text table (Table 1) ####
 
