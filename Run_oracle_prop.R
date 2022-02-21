@@ -24,10 +24,10 @@ p=50
 
 ## number of points on the boundary
 num_circle=50
-N_reps=500
+N_reps=2000
 set.seed(888)
 num_splits<-2
-B=200
+B=2000
 control.name = paste0("Z.",as.character(1:p))
 ### confidence level
 ci_alpha=0.05
@@ -57,7 +57,7 @@ for (j in 1:length(Deltas)) {
                            cons.eta=cons.eta,
                            Sigma=Sigma,Delta=Deltas[j],rho=rho,control.name=control.name)
   
-  
+  ## partial_out is automatically false since we are computing true value of support function
   res<-estimate_sigma(num_circle=num_circle,Delta=Deltas[j],treat.name=c("V1","V2"),
                       outcome.name=c("yL"),is_list=FALSE,mydata, sample_size=100000,partial_out=FALSE)
   for (i in 1:length(sample_sizes)) {
@@ -89,7 +89,7 @@ for (j in 1:length(Deltas)) {
                                        Delta=Deltas[j],treat.name=c("true_treat.V1","true_treat.V2"),outcome.name=c("true_outcome"),fitted_outcome_name="fitted_outcome",
                                        partial_out=TRUE)
     
-    bootstrap_support_function<-lapply(1:B,estimate_sigma,estimate_sigma, sample_size=sample_sizes[i],num_circle=num_circle,
+    bootstrap_support_function<-lapply(1:B,estimate_sigma,sample_size=sample_sizes[i],num_circle=num_circle,
                                        Delta=Deltas[j],treat.name=c("true_treat.V1","true_treat.V2"),outcome.name=c("true_outcome"),fitted_outcome_name="fitted_outcome",
                                        partial_out=TRUE,data=fitted_residuals[[1]])
     
@@ -116,7 +116,7 @@ for (j in 1:length(Deltas)) {
     }
     sup_stat_boot=apply(diff_boot,c(2,3),function(x) max(abs(x)))
     crit.value<-apply(sup_stat_boot,1,quantile,1-ci_alpha)
-    
+    print(crit.value)
     ## rejection frequency
     rej.freq[,i,j]<-apply(sup_stat>crit.value,1,mean )
     

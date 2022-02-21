@@ -24,9 +24,9 @@ p=50
 
 ## number of points on the boundary
 num_circle=50
-N_reps=500
+N_reps=2000
 num_splits<-2
-B=500
+B=2000
 control.name = paste0("Z.",as.character(1:p))
 ### confidence level
 ci_alpha=0.05
@@ -88,7 +88,7 @@ for (j in 1:length(Deltas)) {
                                        Delta=Deltas[j],treat.name=c("treat.X1","treat.X2"),outcome.name=c("true_outcome"),fitted_outcome_name="fitted_outcome",
                                        partial_out=TRUE,weighted=FALSE)
     
-    bootstrap_support_function<-lapply(1:B,estimate_sigma,estimate_sigma, sample_size=sample_sizes[i],num_circle=num_circle,
+    bootstrap_support_function<-lapply(1:B,estimate_sigma,sample_size=sample_sizes[i],num_circle=num_circle,
                                        Delta=Deltas[j],treat.name=c("treat.X1","treat.X2"),outcome.name=c("true_outcome"),fitted_outcome_name="fitted_outcome",
                                        partial_out=TRUE,data=fitted_residuals[[1]],weighted=FALSE)
     

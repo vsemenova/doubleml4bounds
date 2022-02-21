@@ -1,4 +1,3 @@
-
 ## adjust your directoryname here
 directoryname<-"/n/tata/doubleml4bounds/"
 setwd(directoryname)
@@ -7,7 +6,7 @@ source("FirstStage.R")
 source("RemoveControls.R")
 
 
-## true treatment effect parameter
+## true parameter
 beta = c(1,1)
 ## true covarince matrix Sigma
 Sigma = matrix (c(1,0.5,0.5,1),nrow=2,ncol=2)
@@ -18,6 +17,7 @@ cons.y=1
 cons.eta=1
 rho=0.5
 p=50
+
 
 
 ## number of points on the boundary
@@ -42,6 +42,9 @@ rej.freq<-array(0,c(2,length(sample_sizes),length(Deltas)))
 ### save results here
 finaltable<-matrix(0,nrow=length(sample_sizes),ncol=length(Deltas)*4)
 
+
+
+
 ### critical value based on bootstrap
 for (j in 1:length(Deltas)) {
   ### true value of support function is approximated by simulation
@@ -58,17 +61,25 @@ for (j in 1:length(Deltas)) {
     print(paste0("Sample size is ",sample_sizes[i]))
     print(paste0("Bracket width is ", Deltas[j]))
     
+    sample_size=sample_sizes[i]
+    
+    
+    
     simulated_data<-lapply(1:N_reps,simulate_data_2d, decay=decay,
                            sample_size=sample_sizes[i],p=p,beta=beta,cons.x=cons.x,
                            cons.eta=cons.eta,
                            Sigma=Sigma,Delta=Deltas[j],rho=rho,control.name=control.name)
     
-    estimated_support_function<-lapply(simulated_data,sample_size=sample_sizes[i],estimate_sigma,num_circle=num_circle,
-                                       Delta=Deltas[j],treat.name=c("V1","V2"),outcome.name=c("yL"),partial_out=FALSE)
     
-    bootstrap_support_function<-lapply(1:B,estimate_sigma,num_circle=num_circle,Delta=Deltas[j],treat.name=c("V1","V2"),
+    
+    
+    
+    estimated_support_function<-lapply(simulated_data,estimate_sigma_series,sample_size=sample_sizes[i],num_circle=num_circle,
+                                       Delta=Deltas[j],treat.name=c(1:2),outcome.name=c("yL"),partial_out=TRUE,control.name=control.name,weighted=FALSE)
+    
+    bootstrap_support_function<-lapply(1:B,estimate_sigma_series,num_circle=num_circle,Delta=Deltas[j],treat.name=c(1:2),
                                        outcome.name=c("yL"),data=simulated_data[[1]],sample_size=sample_sizes[i],
-                                       partial_out=FALSE)
+                                       partial_out=TRUE,control.name=control.name,weighted=TRUE)
     
     diff<-array(0,c(num_circle,2,N_reps))
     for (k in 1:N_reps) {
@@ -93,7 +104,7 @@ for (j in 1:length(Deltas)) {
     }
     sup_stat_boot=apply(diff_boot,c(2,3),function(x) max(abs(x)))
     crit.value<-apply(sup_stat_boot,1,quantile,1-ci_alpha)
-    print(crit.value)
+    
     ## rejection frequency
     rej.freq[,i,j]<-apply(sup_stat>crit.value,1,mean )
     
@@ -105,5 +116,4 @@ for (j in 1:length(Deltas)) {
 }
 
 finaltable<-apply(finaltable,2,round,2)
-write.csv(finaltable,paste0(directoryname,"/Tables/Table_oracle_std.csv"))
-
+write.csv(finaltable,paste0(directoryname,"/Tables/Table_series_ortho.csv"))

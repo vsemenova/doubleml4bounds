@@ -195,7 +195,11 @@ estimate_sigma_series<-function(data,num_circle,sample_size,Delta,treat.name,out
     
     if (partial_out==TRUE) {
       ## partial out the controls (see Remark 4.2)
-      gammaL.X<-as.matrix(data[inds,fitted_outcome_name])
+      
+      cov<-as.matrix(data[inds,control.name])
+      
+      b.hat=OLS(covariate=cov,outcome=outcomeL,weights=weights)
+      gammaL.X<-as.matrix(cov)%*%b.hat
       outcome = yubg-gammaL.X-Delta/2 
     } else {
       outcome = yubg

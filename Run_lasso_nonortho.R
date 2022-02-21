@@ -1,15 +1,17 @@
+library(hdm)
+library(xtable)
 
-## adjust your directoryname here
 directoryname<-"/n/tata/doubleml4bounds/"
 setwd(directoryname)
+
 source("Functions.R")
 source("FirstStage.R")
 source("RemoveControls.R")
 
 
-## true treatment effect parameter
+## true parameter
 beta = c(1,1)
-## true covarince matrix Sigma
+## true Sigma
 Sigma = matrix (c(1,0.5,0.5,1),nrow=2,ncol=2)
 ## true regression parameters
 decay=2
@@ -22,9 +24,9 @@ p=50
 
 ## number of points on the boundary
 num_circle=50
-N_reps=1000
+N_reps=2000
 num_splits<-2
-B=1000
+B=2000
 control.name = paste0("Z.",as.character(1:p))
 ### confidence level
 ci_alpha=0.05
@@ -42,6 +44,10 @@ rej.freq<-array(0,c(2,length(sample_sizes),length(Deltas)))
 ### save results here
 finaltable<-matrix(0,nrow=length(sample_sizes),ncol=length(Deltas)*4)
 
+### first stage estimation
+method.treat=rlasso
+method.outcome=rlasso
+
 ### critical value based on bootstrap
 for (j in 1:length(Deltas)) {
   ### true value of support function is approximated by simulation
@@ -54,21 +60,33 @@ for (j in 1:length(Deltas)) {
   res<-estimate_sigma(num_circle=num_circle,Delta=Deltas[j],treat.name=c("V1","V2"),
                       outcome.name=c("yL"),is_list=FALSE,mydata, sample_size=100000,partial_out=FALSE)
   for (i in 1:length(sample_sizes)) {
-    
     print(paste0("Sample size is ",sample_sizes[i]))
     print(paste0("Bracket width is ", Deltas[j]))
+    
+    
+    sample_size=sample_sizes[i]
     
     simulated_data<-lapply(1:N_reps,simulate_data_2d, decay=decay,
                            sample_size=sample_sizes[i],p=p,beta=beta,cons.x=cons.x,
                            cons.eta=cons.eta,
                            Sigma=Sigma,Delta=Deltas[j],rho=rho,control.name=control.name)
     
-    estimated_support_function<-lapply(simulated_data,sample_size=sample_sizes[i],estimate_sigma,num_circle=num_circle,
-                                       Delta=Deltas[j],treat.name=c("V1","V2"),outcome.name=c("yL"),partial_out=FALSE)
+    fitted_residuals<-lapply(simulated_data,first_stage,method.treat =method.treat,
+                             method.outcome = method.outcome,
+                             treat.name = c("X1","X2"),
+                             outcome.name = c("yL"),
+                             control.name = control.name,num_splits=1,post=FALSE)
     
-    bootstrap_support_function<-lapply(1:B,estimate_sigma,num_circle=num_circle,Delta=Deltas[j],treat.name=c("V1","V2"),
-                                       outcome.name=c("yL"),data=simulated_data[[1]],sample_size=sample_sizes[i],
-                                       partial_out=FALSE)
+    
+    
+    
+    estimated_support_function<-lapply(fitted_residuals,estimate_sigma,sample_size=sample_sizes[i],num_circle=num_circle,
+                                       Delta=Deltas[j],treat.name=c("treat.X1","treat.X2"),outcome.name=c("true_outcome"),fitted_outcome_name="fitted_outcome",
+                                       partial_out=FALSE,weighted=FALSE)
+    
+    bootstrap_support_function<-lapply(1:B,estimate_sigma, sample_size=sample_sizes[i],num_circle=num_circle,
+                                       Delta=Deltas[j],treat.name=c("treat.X1","treat.X2"),outcome.name=c("true_outcome"),fitted_outcome_name="fitted_outcome",
+                                       partial_out=FALSE,data=fitted_residuals[[1]],weighted=FALSE)
     
     diff<-array(0,c(num_circle,2,N_reps))
     for (k in 1:N_reps) {
@@ -93,7 +111,7 @@ for (j in 1:length(Deltas)) {
     }
     sup_stat_boot=apply(diff_boot,c(2,3),function(x) max(abs(x)))
     crit.value<-apply(sup_stat_boot,1,quantile,1-ci_alpha)
-    print(crit.value)
+    
     ## rejection frequency
     rej.freq[,i,j]<-apply(sup_stat>crit.value,1,mean )
     
@@ -105,5 +123,4 @@ for (j in 1:length(Deltas)) {
 }
 
 finaltable<-apply(finaltable,2,round,2)
-write.csv(finaltable,paste0(directoryname,"/Tables/Table_oracle_std.csv"))
-
+write.csv(finaltable,paste0(directoryname,"/Tables/Table_lasso_nonortho.csv"))
