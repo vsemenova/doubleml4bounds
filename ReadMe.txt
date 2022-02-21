@@ -1,4 +1,4 @@
-The code in this replication package replicates the simulation results contained in Tables 1,2 for the paper
+The code in this replication package replicates the simulation results contained in Tables  for the paper
 
 Semenova, Vira "Debiased Machine Learning of Set-Identified Linear Models", arXiv:1712.10024
 
@@ -12,30 +12,46 @@ The following packages must be installed:
 
 Tables from Main Text and Appendix are referred to as MainTables. The intermediate tables are saved as Tablek.csv, for  k in {oracle_std, oracle_prop, lasso, series}.  
 
+To replicate Table 1 in Main Text 
 
-1. Open  Runk.R, where  k in {oracle_std, oracle_prop, lasso, series}.  
+
+1. Open  Runk.R, where  k in {lasso, series}.  
 
 2. Adjust the foldername in line 6
 
 3. Run Runk.R for each k. The resulting Tablek.csv is saved in ../Tables
 
-4. Run print_main_table.R to get MainTable.txt (Table 1, main text) and AppendixTable.txt (Table A.1, appendix).
+4. Run print_main_table.R to get MainTable.txt
 
 
-Step 3 details:
+To replicate Appendix Tables
 
-The output of Runk.R is the risk and the rejection frequency of the output of the Algorithm 1. The Tables differ in terms of the input values of the algorithm.
+1. Open  Runk.R, where  k in {lasso_nonortho, series_ortho, oracle_nonortho, oracle_ortho}.  
+
+2. Adjust the foldername in line 6
+
+3. Run Runk.R for each k. The resulting Tablek.csv is saved in ../Tables
+
+4. Run print_appendix_table.R to get AppendixTable.txt and AppendixTable2.txt
 
 
-Results:
-    Table_oracle_std.csv:  true (treatment fitted values. zero outcome fitted values (i.e., partialling-out=FALSE)  
+
+Results (Main Table)
+          
+    Table_series.csv series treatment fitted values. zero outcome fitted values (i.e., partialling-out=FALSE). Coincides with Chandrasekhar et al (2012).     
     
-    Table_oracle_prop.csv: true treatment fitted values. LASSO outcome fitted values (i.e., partialling-out=TRUE)  
-             
     Table_lasso.csv: LASSO treatment fitted values. LASSO outcome fitted values (i.e., partialling-out=TRUE). performance close to oracle (Table 2). 
-             
-    Table_series.csv series treatment fitted values. zero outcome fitted values (i.e., partialling-out=FALSE). Coincides with Chandrasekhar et al (2012).        
+    
+Results (Appendix Table)
 
+    Table_oracle_nonortho.csv:  true treatment fitted values. zero outcome fitted values (i.e., partialling-out=FALSE)  
+    
+    Table_oracle_ortho.csv: true treatment fitted values. LASSO outcome fitted values (i.e., partialling-out=TRUE)  
+    
+    Table_lasso_nonortho.csv:  lasso treatment fitted values. zero outcome fitted values (i.e., partialling-out=FALSE)  
+    
+    Table_oracle_ortho.csv: series treatment fitted values. series outcome fitted values (i.e., partialling-out=TRUE)  
+             
 
 
 Important functions:
