@@ -24,7 +24,7 @@ p=50
 
 ## number of points on the boundary
 num_circle=50
-N_reps=2000
+N_reps=10000
 num_splits<-2
 B=2000
 control.name = paste0("Z.",as.character(1:p))
