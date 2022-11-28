@@ -18,11 +18,9 @@ The following packages must be installed:
 ```
 module load R
 
-Rscript Run_series.R Run_lasso.R Run_oracle_nonortho.R Run_oracle_ortho.R Run_lasso_nonortho.R Run_series_ortho.Rls
+Rscript Run_series.R Run_lasso.R Run_oracle_std.R Run_oracle_prop.R
 
-Rscript print_main_table.R 
-
-Rscript print_appendix_table.R
+Rscript print_main_table.R
 
 ```
 
