@@ -9,6 +9,8 @@ The following packages must be installed:
     R 3.6.1 (code was last run with version 3.6.1)
     – hdm (as of 2021-02-16)
     – xtable (as of 2021-02-16)
+    - ranger (as of 2021-02-16)
+
 
 Tables from Main Text and Appendix are referred to as MainTables. The intermediate tables are saved as Tablek.csv, for  k in {oracle_std, oracle_prop, lasso, series}.  
 
@@ -59,3 +61,11 @@ RemoveControls.R
    
 
     
+To replicate Empirical Application/Table 2 of the manuscript, please follow the steps below.
+
+
+Step 1. Adjust the folder name at line 6
+
+Step 2. Rscript Run_lasso.R Run_forest.R print_main_table.R
+
+The final table is  under Tables/MainTable.txt
