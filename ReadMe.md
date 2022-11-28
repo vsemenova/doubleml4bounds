@@ -14,11 +14,25 @@ The following packages must be installed:
     – ```hdm``` (as of 2021-02-16)
     – ```xtable``` (as of 2021-02-16)
 
-# Replication
+# Replication of simulations
 ```
 module load R
 
+cd simulations 
+
 Rscript Run_series.R Run_lasso.R Run_oracle_std.R Run_oracle_prop.R
+
+Rscript print_main_table.R
+
+```
+
+# Replication of empirical exercise
+```
+module load R
+
+cd empirical_applications 
+
+Rscript Run_lasso.R Run_forest.R
 
 Rscript print_main_table.R
 
